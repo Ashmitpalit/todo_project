@@ -4,8 +4,7 @@ import 'package:velocity_x/velocity_x.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const String geminiApiKey =
-    'AIzaSyB2vZltmPo5ydUzUhmovCgpxKJSLaNDiD4'; // Replace with valid API key
+const String geminiApiKey = 'AIzaSyB2vZltmPo5ydUzUhmovCgpxKJSLaNDiD4';
 
 final Uri geminiUri = Uri.parse(
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$geminiApiKey',
@@ -23,6 +22,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.teal,
+        scaffoldBackgroundColor: Colors.grey[50],
+        fontFamily: 'Roboto',
       ),
       home: const TodoHome(),
     );
@@ -75,8 +76,15 @@ class _TodoHomeState extends State<TodoHome> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Edit ToDo"),
-        content: TextField(controller: controller),
+        title: const Text("Edit Task"),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            hintText: "Update your task",
+          ),
+        ),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
@@ -196,27 +204,45 @@ class _TodoHomeState extends State<TodoHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("ToDo + Gemini AI")),
+      appBar: AppBar(
+        title: const Text("📋 ToDo"),
+        centerTitle: true,
+        backgroundColor: Colors.teal.shade300,
+        elevation: 4,
+      ),
       body: Column(
         children: [
-          10.heightBox,
+          12.heightBox,
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: "Add a task...",
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                suffixIcon: IconButton(
-                    icon: const Icon(Icons.add), onPressed: _addTodo),
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(12),
+              child: TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  hintText: "Add a task...",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: _addTodo,
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                ),
               ),
             ),
           ),
           16.heightBox,
           Expanded(
             child: _todos.isEmpty
-                ? const Center(child: Text("No tasks yet!"))
+                ? const Center(
+                    child: Text("You're all caught up!",
+                        style: TextStyle(fontSize: 16)))
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _todos.length,
@@ -229,49 +255,69 @@ class _TodoHomeState extends State<TodoHome> {
                             SlidableAction(
                               onPressed: (_) => _editTodoDialog(index),
                               icon: Icons.edit,
-                              backgroundColor: Colors.blue,
+                              backgroundColor: Colors.indigoAccent,
                             ),
                             SlidableAction(
                               onPressed: (_) => _deleteTodo(index),
                               icon: Icons.delete,
-                              backgroundColor: Colors.red,
+                              backgroundColor: Colors.redAccent,
                             ),
                           ],
                         ),
-                        child: ListTile(
-                          tileColor: todo.isDone
-                              ? Colors.green.shade100
-                              : Colors.teal.shade50,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          leading: Checkbox(
-                            value: todo.isDone,
-                            onChanged: (_) => _toggleComplete(index),
-                          ),
-                          title: Text(
-                            todo.title,
-                            style: TextStyle(
-                              decoration: todo.isDone
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              color: todo.isDone ? Colors.grey : Colors.black,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: todo.isDone
+                                  ? [
+                                      Colors.green.shade100,
+                                      Colors.green.shade200
+                                    ]
+                                  : [Colors.teal.shade50, Colors.teal.shade100],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          subtitle:
-                              Text("Added: ${_formatDate(todo.createdAt)}"),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                        ).pOnly(bottom: 12),
+                          child: ListTile(
+                            leading: Checkbox(
+                              value: todo.isDone,
+                              onChanged: (_) => _toggleComplete(index),
+                            ),
+                            title: Text(
+                              todo.title,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                decoration: todo.isDone
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: todo.isDone
+                                    ? Colors.grey[600]
+                                    : Colors.black,
+                              ),
+                            ),
+                            subtitle: Text("🕒 ${_formatDate(todo.createdAt)}"),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
+                          ),
+                        ).pOnly(bottom: 14),
                       );
                     },
                   ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _showSummary,
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.smart_toy),
+        backgroundColor: Colors.teal.shade400,
+        icon: const Icon(Icons.smart_toy_outlined),
+        label: const Text("AI Summary"),
       ),
     );
   }
